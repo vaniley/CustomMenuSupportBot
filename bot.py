@@ -27,7 +27,7 @@ def generate_keyboard(buttons, add_back=False):
 
     # Если нужно добавить кнопку "Назад", делаем это первой
     if add_back:
-        keyboard.button(text="◀ Назад", callback_data="back")
+        keyboard.button(text=config["back_button_text"], callback_data="back")
 
     # Добавляем остальные кнопки
     for button in buttons:

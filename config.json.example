@@ -1,6 +1,7 @@
 {
     "TOKEN": "YOUR_BOT_TOKEN",
     "welcome_message": "Welcome to the support bot! Please select a section:",
+    "back_button_text": "◀ Back",
     "menu": {
         "Section 1": {
             "description": "Description of Section 1",

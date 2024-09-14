@@ -80,6 +80,10 @@ async def callback_handler(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     data = callback.data
 
+    # Initialize user state if it doesn't exist
+    if user_id not in user_states:
+        user_states[user_id] = ["menu"]
+
     if data == "back":  # Обработка кнопки "Назад"
         if len(user_states[user_id]) > 1:
             user_states[user_id].pop()  # Возвращаемся на уровень выше
@@ -87,28 +91,42 @@ async def callback_handler(callback: types.CallbackQuery):
         keyboard = generate_keyboard(
             current_menu.get("menu", {}).keys(), add_back=len(user_states[user_id]) > 1
         )
+        message_text = (
+            config["welcome_message"]
+            if len(user_states[user_id]) == 1
+            else current_menu.get("description", "Меню")
+        )
         if keyboard:
-            await callback.message.edit_text(
-                current_menu.get("description", "Меню"), reply_markup=keyboard
-            )
+            await callback.message.edit_text(message_text, reply_markup=keyboard)
         else:
-            await callback.message.edit_text(current_menu.get("description", "Меню"))
+            await callback.message.edit_text(message_text)
         return
 
     # Обновляем состояние пользователя
     user_states[user_id].append(data)
     current_menu = get_current_menu(user_id)
 
+    # Проверяем, найдено ли текущее меню
+    if "menu" not in current_menu and "description" not in current_menu:
+        # Если меню не найдено, возвращаем пользователя на главную
+        user_states[user_id] = ["menu"]
+        current_menu = get_current_menu(user_id)
+
     # Получаем клавиатуру для текущего меню
     keyboard = generate_keyboard(current_menu.get("menu", {}).keys(), add_back=True)
 
+    # Определяем текст сообщения
+    message_text = (
+        config["welcome_message"]
+        if len(user_states[user_id]) == 1
+        else current_menu.get("description", "Меню")
+    )
+
     # Отправляем описание текущего меню и клавиатуру
     if keyboard:
-        await callback.message.edit_text(
-            current_menu.get("description", "Меню"), reply_markup=keyboard
-        )
+        await callback.message.edit_text(message_text, reply_markup=keyboard)
     else:
-        await callback.message.edit_text(current_menu.get("description", "Меню"))
+        await callback.message.edit_text(message_text)
 
 
 # Основная функция
